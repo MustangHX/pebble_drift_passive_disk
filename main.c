@@ -17,11 +17,11 @@ int main(argc, argv)
 	int argc;
 	char *argv[];
 {
-	alpha=0.0001;
+	alpha=alpha_init;
 	mdot=mdot_init;
 	int i,j,n,num_step=0,tot_num_step=(int)(time_yr*1.0/init_step),check,NbRestart;
 	double AREA,a_pb1,a_max,vol_plus,tau,vr0,mass_flow_inner;
-	double coag_eff=1.0,tot_mass=0.0,out_source=0.0,a_p,r0,dt=init_step,time_sum=0.0,dt2,tot_mass_dust;
+	double coag_eff=1.0,tot_mass=0.0,out_source=0.0,a_p,r0,dt=init_step,time_sum=0.0,dt2,tot_mass_dust,t_single=0.0;
 	double vr1,vr2,tau1,tau2;
 	FILE *fp,*fp2,*fp3,*fp4;
 	char outname[256], outname2[256];
@@ -91,20 +91,21 @@ int main(argc, argv)
 	fp=fopen("1mm.txt","w");
 	num_step=0;
 	a_p=0.1;
-	r0=10.375;
+	r0=30.00;
         fprintf(fp,"%e\t%e\n",r0,a_p);
 			
-	while(r0>1.0){
-	vr0=vr_estimate(r0,a_p,pp_vr_tau0);
+	while(r0>0.1){
+	vr0=drift_vr(r0,a_p,pp_vr_tau0);
 	tau=pp_vr_tau0[1];
 	r0-=vr0*dt*TUNIT/LUNIT;
+	t_single+=dt;
 	a_max=2.25*mean_path(r0);
-	vol_plus=1.0*M_PI*a_p*a_p*sqrt(vr0*vr0+0.25*tau*vr0*tau*vr0)*dt*TUNIT;
+	vol_plus=0.0*M_PI*a_p*a_p*sqrt(vr0*vr0+0.25*tau*vr0*tau*vr0)*dt*TUNIT;
 	if(a_p > a_max) {check=1; vol_plus=0.0;}
 	else check=0;
-	a_p=pow(((vol_plus*coag_eff*0.1*density(r0)/rho_peb+4.0/3.0*M_PI*a_p*a_p*a_p)*3.0/4.0/M_PI),0.33333333333333333);
+	a_p=pow(((vol_plus*coag_eff*dust_gas*density(r0)/rho_peb+4.0/3.0*M_PI*a_p*a_p*a_p)*3.0/4.0/M_PI),0.33333333333333333);
 	if(check==0 && a_p>=a_max)       a_p=a_max;
-	fprintf(fp,"%e\t%e\n",r0,a_p);
+	fprintf(fp,"%e\t%e\t%e\n",r0,a_p,t_single);
 	}
 	fclose(fp);
 

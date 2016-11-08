@@ -59,7 +59,7 @@ for(j=0;j<peb_size_num;j++){
 }
 
 //printf("mass_gain=%f\t %f\t %f\t ring_num=%d\n",mass_gain,vol_plus,dt1,i);
-}while(mass_gain>0.004 || frac>0.1);
+}while(mass_gain>0.003 || frac>0.09);
 dt_ring[i]=dt1;
 }
 

@@ -11,7 +11,10 @@
 #define LUNIT 1.49597871e13
 #define MSUN 1.9891e33
 #define MUNIT 1.9891e33
-#define mdot_init 5.0e-9
+#define mdot_init 1.0e-9
+#define alpha_init 1e-4
+#define temp0 172.043610986 //temp at 1 AU
+#define r_tran 300.365  //transition from active to passive
 #define TUNIT 3.15569e7
 #define k_P 2.55
 #define k_B 1.38e-16
@@ -33,7 +36,7 @@
 #define peb_size_num 54
 #define peb_size_lim 0.3 //in cm
 #define size_step 0.05
-#define size_slope 1.0
+#define size_slope 5.0
 #define dust_gas 0.01
 #define peb_dust 0.01
 #define R_OUT 30.0
