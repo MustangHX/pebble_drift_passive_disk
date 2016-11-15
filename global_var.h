@@ -1,6 +1,7 @@
 #include "global_ex.h"
 #ifndef PEB_STRUCT
 #define PEB_STRUCT
+#define MAXNUM 50
 extern double dt_ring[ring_num];
 typedef struct PEBBLE{
 	int max_step;
@@ -43,9 +44,33 @@ typedef struct DUST_MAP{
         double surf_dens;
 	double rho;
 } DUST_MAP;
+
+
+typedef struct SPLINE
+{
+
+ double begin_k2;
+ float x[MAXNUM+1];
+ float y[MAXNUM+1];
+ int point_num;
+
+ float end_k2;
+
+ float k1[MAXNUM+1];
+ float k2[MAXNUM+1];
+
+ float a3[MAXNUM],a1[MAXNUM];
+ float b3[MAXNUM],b1[MAXNUM];
+
+}SPLINE,*pSPLINE;
+
 extern PEBBLE peb_group[peb_num];
 extern PEBBLE_MAP peb_map[ring_num];
 extern DUST_MAP dust_budget[ring_num];
 extern double alpha;
 extern double mdot;
+extern double opa;
+extern int ITER;
+extern SPLINE opa_line;
+extern pSPLINE p_opa_line;
 #endif

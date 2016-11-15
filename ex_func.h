@@ -12,7 +12,7 @@ double drift_vr_test(double argc1,double argc2,double *argc3);
 double v_r1_test(double argc1, double argc2);
 double *v_r2(double argc1, double argc2);
 int drift_t(PEBBLE *argc1, double argc2, int argc3);
-void Init();
+void Init2();
 void frag();
 void stokes_size();
 void tau_unity();
@@ -37,4 +37,9 @@ double yeta(double argc);
 double v_K(double argc);
 double vt_gas(double argc);
 double temperature(double argc);
+double func_spline3(double argc1,pSPLINE argc2);
+double opac(double argc1, double argc2);
+double opa_iter(double r, double opa0);
+void opa_init();
+int Spline3(pSPLINE pLine);
 

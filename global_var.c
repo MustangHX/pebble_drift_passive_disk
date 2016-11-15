@@ -5,4 +5,8 @@ DUST_MAP dust_budget[ring_num];
 double dt_ring[ring_num];
 double alpha;
 double mdot;
+double opa;
+int ITER;
+SPLINE opa_line;
 
+pSPLINE p_opa_line = &opa_line;

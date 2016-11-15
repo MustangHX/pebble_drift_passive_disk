@@ -5,73 +5,22 @@
 #include <stdio.h>
 double pp_vr_tau1[2]={0.0};
 
-void Init(){
-	int i,j;
-	double AREA;
-/*        for(i=0;i<100;i++){
-                size=drag_group(i*1.0+0.5,0.01);
-                for(j=0;j<100;j++){		
-			if(j==(int)(size*10)){
-                               pebble[i][j]=i*1.0*2*M_PI*dr;
-		                             }
-		                  }
-		          }
-	fp=fopen("velocity.dat","r");
-	if(fp=None){
-		for(j=0;j<100;j++){
-			size=j*1.0;
-			for(i=0;i<100;i++){
-				velocity[i][j]
-			
-}
-}
-}*/
+void opa_init(){// initialize opacity profile
+	int i,nr=30;
+	double rad[nr],opac1d[nr];
+	for(i=nr-1;i>=0;i--){
+	if (i>nr-2)  opa=0.1;
+	else opa=opac1d[i+1];
+	rad[i]=(r_min*0.9)*exp(i*1.0/nr*log(R_OUT*1.1/(r_min*0.9)));
+	opac1d[i]=opa_iter(rad[i],opa);
+	opa_line.x[i]=rad[i];
+	opa_line.y[i]=opac1d[i];
+	}
+	opa_line.point_num=nr;
+	opa_line.begin_k2=0.0;
+	opa_line.end_k2=0.0;
 	
-	for(i=0;i<ring_num;i++){
-		dust_budget[i].rad=i*size_ring+1.0-size_ring;
-		AREA=M_PI*((dust_budget[i].rad+size_ring/2.0)*(dust_budget[i].rad+size_ring/2.0)-(dust_budget[i].rad-size_ring/2.0)*(dust_budget[i].rad-size_ring/2.0))*LUNIT*LUNIT;
-		dust_budget[i].AREA=AREA;
-		dust_budget[i].dr=size_ring;
-		dust_budget[i].mass_in=0.0;
-		for(j=0;j<peb_size_num;j++){
-                dust_budget[i].surf_dens=Sigma(dust_budget[i].rad)*dust_gas;
-		dust_budget[i].rho=density(dust_budget[i].rad)*dust_gas;
-		}
-		dust_budget[i].mass_out=dust_budget[i].surf_dens*AREA;
-	}
-	i=0;
-	for(i=0;i<ring_num;i++){
-  //              printf("SIGMAAAAA%e\t%d\t",peb_map[i].surf_dens,i);
-//		printf("%d\n",i);
-		peb_map[i].dr=size_ring;
-		peb_map[i].rad=i*size_ring+1.0-size_ring;
-                peb_map[i].time=0.0;
-		peb_map[i].AREA=M_PI*((peb_map[i].rad+size_ring/2.0)*(peb_map[i].rad+size_ring/2.0)-(peb_map[i].rad-size_ring/2.0)*(peb_map[i].rad-size_ring/2.0))*LUNIT*LUNIT;
-		for(j=0;j<=peb_size_num;j++){
-			peb_map[i].size[j]=0.1*pow(10,j*size_step);
-		}
-		for(j=0;j<peb_size_num;j++){
-			peb_map[i].size_med[j]=0.5*(peb_map[i].size[j]+peb_map[i].size[j+1]);
-			if(i==1) printf("SIZE=%fcm\n",peb_map[i].size[j]);
-				//drag_group((i+1)*0.25,0.01*(j+1));
-			AREA=M_PI*((peb_map[i].rad+size_ring/2.0)*(peb_map[i].rad+size_ring/2.0)-(peb_map[i].rad-size_ring/2.0)*(peb_map[i].rad-size_ring/2.0))*LUNIT*LUNIT;
-			if ((j<1 && i==ring_num-1)|| 1) {
-				//peb_map[i].mass_out[j]=0.1*AREA*0.01*(Sigma((i+4)*0.25)*exp(-1.0*peb_map[i].size[j]/0.1)+1e-10);
-				peb_map[i].mass_out[j]=1.0*AREA*(0.01*Sigma(peb_map[i].rad_med)*exp(-1.0*peb_map[i].size_med[j]/0.1)+1e-10);
-			}
-			else peb_map[i].mass_out[j]=peb_low_lim*AREA;
-			peb_map[i].mass_out[j]/=peb_size_num;//comes from dust_budget
-			peb_map[i].surf_dens[j]=peb_map[i].mass_out[j]/AREA;
-			peb_map[i].mass_in[j]=0.0;
-		}
-  //              printf("SIGMAAAAA%e\t%d\n",peb_map[i].surf_dens,i);
-	}
-	for(i=0;i<ring_num;i++){
-	for(j=0;j<peb_size_num;j++){
-//		printf("%d%d %e\t",i,j,peb_map[i].surf_dens[j]);
-	}
-//	printf("\n");
-	}
+	Spline3(p_opa_line);
 }
 
 void Init2(){// disk with variable resolution
@@ -81,7 +30,9 @@ void Init2(){// disk with variable resolution
 	FILE *fp;
 	size_ring1=size_ring/10.0;
         size_ring2=size_ring*10.0;
-			
+	ITER=1;
+	opa_init();
+	ITER=0;
 	for(i=0;i<ring_num;i++){
 	if(i<i_lim1) {
 		dust_budget[i].rad=i*size_ring1+0.1;

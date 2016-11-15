@@ -6,6 +6,7 @@
 //
 //
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "ex_func.h"
@@ -13,9 +14,9 @@
 #include "global_var.h"
 double pp_vr_tau0[2]={0.0};
 double pp_vr_tau2[2]={0.0};
-int main(argc, argv)
-	int argc;
-	char *argv[];
+int main(int argc, char *argv[])
+//	int argc;
+//	char *argv[];
 {
 	alpha=alpha_init;
 	mdot=mdot_init;
@@ -26,9 +27,9 @@ int main(argc, argv)
 	FILE *fp,*fp2,*fp3,*fp4;
 	char outname[256], outname2[256];
 	int Restarting = 0,grow_method=3;
-	printf("%s\n",argv);
+	printf("%s\n",argv[0]);
 	for(i=0; i< argc; i++){
-		printf("%c",argv[i]);
+		printf("%s",argv[i]);
 		if (strchr (argv[i], 's')) {
 		Restarting = 1;
 		i++;
@@ -42,7 +43,7 @@ int main(argc, argv)
 	//drift(1.0,drag_group(1.0,0.01));
         printf("PPPPeEEEBBBB%.12f\n",drag_group(1.0,0.01));
 	Init2();
-	printf("SIZEOF PEB=%e\t DUST=%e\n",sizeof(peb_map[0]),sizeof(dust_budget[0]));
+	printf("SIZEOF PEB=%lu\t DUST=%lu\n",sizeof(peb_map[0]),sizeof(dust_budget[0]));
 	check_disk(1.0);
 	drift_vr_test(1.0,152.0,pp_vr_tau2);
         fp=fopen("vr_check.txt","w");
@@ -92,7 +93,7 @@ int main(argc, argv)
 	num_step=0;
 	a_p=0.1;
 	r0=30.00;
-        fprintf(fp,"%e\t%e\n",r0,a_p);
+        fprintf(fp,"%e\%e\n",r0,a_p);
 			
 	while(r0>0.1){
 	vr0=drift_vr(r0,a_p,pp_vr_tau0);
@@ -168,7 +169,7 @@ int main(argc, argv)
 	}
 	dust_evolve(dt);
 	//disk_evolve();
-	//coagulation(dt);
+	if(COAG_SW==1) coagulation(dt);
 	mass_flow_inner=0.0;
 	for(i=ring_num-1;i>-1;i--){
         for(j=0;j<peb_size_num;j++){

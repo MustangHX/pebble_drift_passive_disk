@@ -35,25 +35,23 @@ for(i=0;i<ring_num;i++){
 }
 }
 
-double coag_kernel(double a_pb1,double a_pb2,double delta_v,double rho1, double rho2, double dt0, double rad, int i, int j, int jj){
-	double cross_section, path,n_density,n_density1,n_density2;
-	n_density2=rho2/(rho_peb*4.0*M_PI*a_pb1*a_pb1*a_pb1/3.0)*0.85;
-	n_density1=rho1/(rho_peb*4.0*M_PI*a_pb2*a_pb2*a_pb2/3.0)*0.85;//disk within -h to h
+double coag_kernel(double a_pb1,double a_pb2,double delta_v,double n_density1, double n_density2,double hei1, double hei2, int i, int j, int jj){
+	double cross_section, path,n_density;
 	if(a_pb1 >= a_pb2) n_density=n_density2;
 	else n_density=n_density1;
 	cross_section=M_PI*(a_pb1*a_pb1+a_pb2*a_pb2);
 	cross_section=M_PI*(a_pb1+a_pb2)*(a_pb1+a_pb2);
 	//delta_v=fabs(v1-v2);
-	path=cross_section*n_density*delta_v*dt0*TUNIT;
-	if(path>1.0)	printf("path=%e N1=%e rho1=%e N2=%e rho2=%e sig1=%e hei=%e %d %d %d\n",\
-			path,n_density1,rho1,n_density2,rho2,peb_map[i].surf_dens[jj],peb_map[i].hei[jj],i,j,jj);
+	path=cross_section*delta_v*n_density1*n_density2/sqrt(2*M_PI*(hei1*hei1+hei2*hei2));
+	if(path>1.0)	printf("path=%e N1=%e  N2=%e  sig1=%e hei=%e %d %d %d\n",\
+			path,n_density1,n_density2,peb_map[i].surf_dens[jj],peb_map[i].hei[jj],i,j,jj);
 	return 1.0*path;
 }
 void coagulation(double dt0){
         int i,j,jj,jjj=0,j_new;
 	double a_pb1,a_pb2,a_pb3,v1,v2,delta_v,dr,dt1,sub_t;
-	double frac_s,frac_s2,mass0;
-
+	double frac_s,frac_s2,mass0,n1,n2,n0,n_delta,h1,h2,m_pb1,m_pb2,m_pb3;
+	
 	for (i=ring_num-1;i>=2;i--){
 		dr=peb_map[i].dr;
 		frac_s=0.0;
@@ -66,10 +64,17 @@ void coagulation(double dt0){
 			for(jj=j-1;jj>=0;jj--){
 			a_pb1=peb_map[i].size_med[j];
 			a_pb2=peb_map[i].size_med[jj];
+			n1=peb_map[i].surf_dens[j]/(rho_peb*4.0*M_PI*a_pb1*a_pb1*a_pb1/3.0);
+			n2=peb_map[i].surf_dens[jj]/(rho_peb*4.0*M_PI*a_pb2*a_pb2*a_pb2/3.0);
+
 			v1=peb_map[i].vr[j]-peb_map[i].vr[jj];
                         v2=peb_map[i].vt[j]-peb_map[i].vt[jj];
+			h1=peb_map[i].hei[j];
+			h2=peb_map[i].hei[jj];
 			delta_v=sqrt(v1*v1+v2*v2);
-			frac_s2=coag_kernel(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],dt1,peb_map[i].rad_med,i,j,jj);
+			n_delta=coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);
+			if(n1>n2) frac_s2=n_delta/n2;
+			else frac_s2=n_delta/n1;
 			if(frac_s2>frac_s){
 			frac_s=frac_s2;
 			jjj=j;
@@ -85,24 +90,36 @@ void coagulation(double dt0){
 		for(j=peb_size_num-1;j>=1;j--){
                         if(peb_map[i].surf_dens[j] < 1e-5) continue;
                         for(jj=j-1;jj>=0;jj--){
-                        a_pb1=peb_map[i].size_med[j];
-                        a_pb2=peb_map[i].size_med[jj];
-                        v1=peb_map[i].vr[j]-peb_map[i].vr[jj];
-                        v2=peb_map[i].vt[j]-peb_map[i].vt[jj];
-                        delta_v=sqrt(v1*v1+v2*v2);	
 			
+				
+			a_pb1=peb_map[i].size_med[j];
+			a_pb2=peb_map[i].size_med[jj];
+
 			a_pb3=pow(a_pb1*a_pb1*a_pb1+a_pb2*a_pb2*a_pb2,1.0/3.0);
 			j_new=floor(log10(a_pb3/size_min)/size_step);
 			if(j_new>=peb_size_num) j_new=peb_size_num-1;
 			
-			frac_s=coag_kernel(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],dt1,peb_map[i].rad_med,i,j,jj);
+			m_pb1=rho_peb*4.0*M_PI*a_pb1*a_pb1*a_pb1/3.0;
+			m_pb2=rho_peb*4.0*M_PI*a_pb2*a_pb2*a_pb2/3.0;
+			m_pb3=rho_peb*4.0*M_PI*a_pb3*a_pb3*a_pb3/3.0;
+			n1=peb_map[i].surf_dens[j]/m_pb1;
+			n2=peb_map[i].surf_dens[jj]/m_pb2;
+
+			v1=peb_map[i].vr[j]-peb_map[i].vr[jj];
+                        v2=peb_map[i].vt[j]-peb_map[i].vt[jj];
+			h1=peb_map[i].hei[j];
+			h2=peb_map[i].hei[jj];
+			delta_v=sqrt(v1*v1+v2*v2);
+			n_delta=coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);
+			
+			
 	//		if(frac_s> 0.8) printf("rho=%e\t%e\t%f\t%f\t%f\t%f\t%f\n",peb_map[i].rho[j],peb_map[i].rho[jj],frac_s,peb_map[i].rad_med,peb_map[i].size_med[j],peb_map[i].size_med[jj],delta_v);
 			//			frac_s=0.5;
 			//peb_map[i].mass_in[j]-=peb_map[i].mass_in[j]*frac_s;
-			mass0=peb_map[i].mass_out[j];
-			peb_map[i].mass_in[j_new]+=mass0*frac_s*(pow(a_pb2/a_pb1,3)+1.0);
-			peb_map[i].mass_out[jj]-=mass0*frac_s*pow(a_pb2/a_pb1,3);
-			peb_map[i].mass_out[j]-=mass0*frac_s;
+			
+			peb_map[i].mass_in[j_new]+=m_pb3*n_delta;
+			peb_map[i].mass_in[jj]-=m_pb2*n_delta;
+			peb_map[i].mass_in[j]-=m_pb1*n_delta;
 		//	peb_map[i].surf_dens[j]=peb_map[i].mass_out[j]/peb_map[i].AREA;
                 //	peb_map[i].rho[j]=peb_map[i].surf_dens[j]/sqrt(2.0*M_PI)/peb_map[i].hei[j];
 		//	peb_map[i].surf_dens[jj]=peb_map[i].mass_out[jj]/peb_map[i].AREA;
