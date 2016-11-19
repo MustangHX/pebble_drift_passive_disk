@@ -11,7 +11,7 @@ void opa_init(){// initialize opacity profile
 	for(i=nr-1;i>=0;i--){
 	if (i>nr-2)  opa=0.1;
 	else opa=opac1d[i+1];
-	rad[i]=(r_min*0.9)*exp(i*1.0/nr*log(R_OUT*1.1/(r_min*0.9)));
+	rad[i]=(r_min*0.9)*exp(i*1.0/nr*log(R_OUT*1.5/(r_min*0.9)));
 	opac1d[i]=opa_iter(rad[i],opa);
 	opa_line.x[i]=rad[i];
 	opa_line.y[i]=opac1d[i];
@@ -62,6 +62,7 @@ void Init2(){// disk with variable resolution
 	for(j=0;j<peb_size_num;j++){
 	dust_budget[i].surf_dens=Sigma(dust_budget[i].rad_med)*dust_gas;
 	dust_budget[i].rho=density(dust_budget[i].rad_med)*dust_gas;
+	dust_budget[i].hei=height(dust_budget[i].rad_med);
 	}
 	dust_budget[i].mass_out=dust_budget[i].surf_dens*dust_budget[i].AREA;
 	//printf("%d\t%g\n",i,dust_budget[i].surf_dens);
@@ -85,6 +86,7 @@ void Init2(){// disk with variable resolution
 		//peb_map[i].vr[j]=vr_estimate(peb_map[i].rad_med,peb_map[i].size_med[j],pp_vr_tau1);
 		peb_map[i].vr[j]=drift_vr(peb_map[i].rad_med,peb_map[i].size_med[j],pp_vr_tau1);
 		tau=pp_vr_tau1[1];
+		peb_map[i].tau_fric[j]=tau;
 		peb_map[i].vt[j]=0.5*tau*peb_map[i].vr[j];
 		peb_map[i].vr_med_s[j]=drift_vr(peb_map[i].rad,peb_map[i].size_med[j],pp_vr_tau1);
                 //tau=pp_vr_tau1[1];

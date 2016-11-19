@@ -25,6 +25,7 @@ typedef struct PEBBLE_MAP{
 	double mass_out[peb_size_num];
         double surf_dens[peb_size_num];
 	double rho[peb_size_num];
+	double tau_fric[peb_size_num];
 	double vr[peb_size_num];//vr when both r and size are in center of box
 	double vt[peb_size_num];
 	double vr_med_r[peb_size_num+1];//vr when r=r_med
@@ -38,6 +39,7 @@ typedef struct DUST_MAP{
         double dr;
         double rad;//inner edge radius
 	double rad_med;
+	double hei;
 	double AREA;
 	double mass_in;
 	double mass_out;

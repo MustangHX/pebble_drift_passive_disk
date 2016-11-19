@@ -9,7 +9,7 @@ double pp_vr_tau[2]={0.0};
 double grow_3b_ada_fix(double dt0, double tot_time){ //adaptive timestep with variable radial resolution
         int i,j,i_new,j_new;
         double a_pb1,a_pb11,a_pb2,a_pb22,a_pb3,vr0,vr1,vr2,vt0,AREA,dr,a_max,dt1,sub_time1,mass_gain,ring_mass_gain=0.0,ring_sigma;
-        double tau,vol_plus,frac,frac_s,coag_eff,ring_mass_before,ring_mass_after,old_sigma,ratio_sigma=1.0;
+        double tau,vol_plus,frac,frac_s,coag_eff,ring_mass_before,ring_mass_after,old_sigma,ratio_sigma=1.0,rho_eff,h1,h2;
         dr=size_ring;
         coag_eff=1.0;
 
@@ -46,14 +46,16 @@ for(j=0;j<peb_size_num;j++){
         //vr0=vr_estimate(peb_map[i].rad+dr/2.0,a_pb1,pp_vr_tau);
 	vr0=peb_map[i].vr_med_r[j];
 	vt0=peb_map[i].vt_med_r[j];
+	h1=dust_budget[i].hei;
+	h2=peb_map[i].hei[j];
         if(vr0*dt1*TUNIT/LUNIT/dr>frac) frac=vr0*dt1*TUNIT/LUNIT/dr;
-
+	rho_eff=dust_budget[i].surf_dens/sqrt(2*M_PI*(h1*h1+h2*h2));
 	tau=pp_vr_tau[1];
         if(a_pb1>a_max) vol_plus=0.0;
         else{
         vol_plus=1.0*M_PI*a_pb1*a_pb1*sqrt(vr0*vr0+vt0*vt0)*dt1*TUNIT;
         }
-        a_pb11=pow(((vol_plus*coag_eff*dust_budget[i].rho/rho_peb+4.0/3.0*M_PI*a_pb1*a_pb1*a_pb1)*3.0/4.0/M_PI),1.0/3.0);
+        a_pb11=pow(((vol_plus*coag_eff*rho_eff/rho_peb+4.0/3.0*M_PI*a_pb1*a_pb1*a_pb1)*3.0/4.0/M_PI),1.0/3.0);
         if(a_pb1<a_max && a_pb11>a_max) a_pb11=a_max;
 	if(a_pb11/a_pb1-1.0>mass_gain) mass_gain=a_pb11/a_pb1-1.0;
 }
@@ -84,8 +86,11 @@ for(j=0;j<peb_size_num;j++){
   	vr0=peb_map[i].vr_med_r[j];
         vt0=peb_map[i].vt_med_r[j];
 
+	h1=dust_budget[i].hei;
+	h2=peb_map[i].hei[j];
+	rho_eff=dust_budget[i].surf_dens/sqrt(2*M_PI*(h1*h1+h2*h2));
 	//tau=pp_vr_tau[1];
-
+	
         if(a_pb1>a_max ||dust_budget[i].surf_dens< 1e-6 || (i==0)) vol_plus=0.0;
         else{
         //vol_plus=1.0*M_PI*a_pb1*a_pb1*sqrt(vr0*vr0+0.25*tau*vr0*tau*vr0)*dt1*TUNIT;
@@ -93,7 +98,7 @@ for(j=0;j<peb_size_num;j++){
         vol_plus=1.0*M_PI*a_pb1*a_pb1*sqrt(vr0*vr0+vt0*vt0)*dt1*TUNIT;
 	//printf("vol2=%g\n",vol_plus);
         }
-        a_pb11=pow(((vol_plus*coag_eff*dust_budget[i].rho/rho_peb+4.0/3.0*M_PI*a_pb1*a_pb1*a_pb1)*3.0/4.0/M_PI),1.0/3.0);
+        a_pb11=pow(((vol_plus*coag_eff*rho_eff/rho_peb+4.0/3.0*M_PI*a_pb1*a_pb1*a_pb1)*3.0/4.0/M_PI),1.0/3.0);
         if(a_pb1<a_max && a_pb11>a_max) a_pb11=a_max;
         a_pb2=peb_map[i].size[j+1];
        // vr0=vr_estimate(peb_map[i].rad+dr/2.0,a_pb2,pp_vr_tau);
@@ -107,7 +112,7 @@ for(j=0;j<peb_size_num;j++){
 	vol_plus=1.0*M_PI*a_pb2*a_pb2*sqrt(vr0*vr0+vt0*vt0)*dt1*TUNIT;
         
 	    }
-        a_pb22=pow(((vol_plus*coag_eff*dust_budget[i].rho/rho_peb+4.0/3.0*M_PI*a_pb2*a_pb2*a_pb2)*3.0/4.0/M_PI),1.0/3.0);
+        a_pb22=pow(((vol_plus*coag_eff*rho_eff/rho_peb+4.0/3.0*M_PI*a_pb2*a_pb2*a_pb2)*3.0/4.0/M_PI),1.0/3.0);
         if(a_pb2<a_max && a_pb22>a_max) a_pb22=a_max;
 	
         a_pb3=(a_pb2-a_pb1)/(a_pb22-a_pb11)*(a_pb2-a_pb11)+a_pb1;

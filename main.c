@@ -80,6 +80,14 @@ int main(int argc, char *argv[])
                 fprintf(fp,"%f\n",peb_map[i].rad+peb_map[i].dr/2.0);
 	        }
         fclose(fp);
+	fp=fopen("tau_chart.txt","w");
+	for(i=0;i<ring_num;i++){
+	for(j=0;j<peb_size_num;j++){
+		fprintf(fp,"%e\t",peb_map[i].tau_fric[j]);
+	}
+	fprintf(fp,"\n");
+	}
+	fclose(fp);
 	out_source=0.0;
 	for(j=0;j<peb_size_num;j++){
 		i=ring_num-1;
@@ -169,7 +177,7 @@ int main(int argc, char *argv[])
 	}
 	dust_evolve(dt);
 	//disk_evolve();
-	if(COAG_SW==1) coagulation(dt);
+	if(1 || COAG_SW==1) {coagulation(dt);}
 	mass_flow_inner=0.0;
 	for(i=ring_num-1;i>-1;i--){
         for(j=0;j<peb_size_num;j++){

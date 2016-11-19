@@ -29,13 +29,15 @@
 
 #define time_yr 5000000
 #define peb_num 50
+#define v_coag_max 1000 //cm/s
+#define v_tran_width 500 // cm/s
 #define size_ring 0.25
 #define size_min 0.1
 #define outp_time 100
 #define NUM_LIM 100
-#define peb_size_num 54
+#define peb_size_num 35
 #define peb_size_lim 0.3 //in cm
-#define size_step 0.05
+#define size_step 0.1
 #define size_slope 5.0
 #define dust_gas 0.01
 #define peb_dust 0.01
