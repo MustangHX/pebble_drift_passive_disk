@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 	r0=30.00;
         fprintf(fp,"%e\%e\n",r0,a_p);
 			
-	while(r0>0.1){
+	while(0 && r0>0.1){
 	vr0=drift_vr(r0,a_p,pp_vr_tau0);
 	tau=pp_vr_tau0[1];
 	r0-=vr0*dt*TUNIT/LUNIT;
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 	}
 	dust_evolve(dt);
 	//disk_evolve();
-	if(1 || COAG_SW==1) {coagulation(dt);}
+	if(1 || COAG_SW>0) {coagulation(dt);}
 	mass_flow_inner=0.0;
 	for(i=ring_num-1;i>-1;i--){
         for(j=0;j<peb_size_num;j++){
