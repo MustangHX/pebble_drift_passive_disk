@@ -20,7 +20,7 @@
 #define k_B 1.38e-16
 #define sig_sb 5.6704e-5
 //#define opa 10.0
-#define r_star 0.0
+#define r_star 0.01395141 //T_Tauri with 3 solar radius
 #define mu 2.33
 #define m_p 1.660538921e-24
 #define G 6.674e-8

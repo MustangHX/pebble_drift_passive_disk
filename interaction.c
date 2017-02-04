@@ -84,22 +84,40 @@ double coag_kernel2(double a_pb1,double a_pb2,double delta_v,double rho1, double
 	return 1.0*path;
 }
 
-void coagulation(double dt0){
-        int i,j,jj,jjj=0,j_new,j_news,j_newl,N_diff=1000,sweep=0;
+void coagulation(double dt0, double tot_time){
+        int i,j,jj,jjj=0,j_new,j_news,j_newl,N_diff=100000,sweep=0;
 	double a_pb1,a_pb2,a_pb3,v1,v2,delta_v,dr,dt1,sub_t;
 	double frac_s,frac_s2,frac_m,frac_m1,frac_m2,mass0,n1,n2,n0,n_delta,h1,h2,m_pb1,m_pb2,m_pb3,AREA;
+	double frac_m1t,frac_m2t;//temporary mass fraction
 	
+	if(1 && ((int)tot_time)%100==0){
+	for(i=0;i<ring_num;i++){
+	      dtco_ring[i]=dt0;
+		}
+	}
 	for (i=ring_num-1;i>=1;i--){
 		dr=peb_map[i].dr;
 		AREA=peb_map[i].AREA;
 		frac_s=0.0;
 		frac_m=0.0;
+		frac_m1=0.0;
+		frac_m2=0.0;
 		frac_s2=0.0;
+		
+
+	if(1 && ((int)tot_time)%100!=0){
+			 dt1=2.0*dtco_ring[i];
+	}
+	else {
 		dt1=2.0*dt0;
+	}
+		
 		do{
 		dt1=dt1/2.0;
 		frac_s=0.0;
 		frac_m=0.0;
+		frac_m1=0.0;
+		frac_m2=0.0;
 		for(j=peb_size_num-1;j>=1;j--){
 			if(peb_map[i].surf_dens[j] < 1e-5) continue;
 			for(jj=j-1;jj>=0;jj--){
@@ -121,13 +139,21 @@ void coagulation(double dt0){
 			if(0||jj>=(((j-N_diff)>0)?(j-N_diff):0)){
 			n_delta=dt1*TUNIT*coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);
 			
-			if(n1<n2) frac_m2=n_delta/n1;//(2*M_PI*h1*h2*n2/sqrt(2*M_PI*(h1*h1+h2*h2)));
-			else frac_m2=n_delta/n2;//(2*M_PI*h1*h2*n1/sqrt(2*M_PI*(h1*h1+h2*h2)));
+//			if(n1<n2) frac_m2=n_delta/n1;//(2*M_PI*h1*h2*n2/sqrt(2*M_PI*(h1*h1+h2*h2)));
+//			else frac_m2=n_delta/n2;//(2*M_PI*h1*h2*n1/sqrt(2*M_PI*(h1*h1+h2*h2)));
+
+			frac_m1t=n_delta*m_pb2/n1/m_pb1;
+			frac_m2t=n_delta/m_pb1;
+			if(frac_m1t>frac_m1) frac_m1=frac_m1t;
+			if(frac_m2t>frac_m2) frac_m2=frac_m2t;
+
 			}
 			else if(sweep){
-				frac_m1=dt1*TUNIT*coag_kernel2(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],i,j,jj);
-				frac_m2=frac_m*n1/peb_map[i].mass_out[jj];
-				frac_s2=pow(frac_m1/m_pb1,1.0/3.0);
+				//frac_m1=1.0/m_pb1*dt1*TUNIT*coag_kernel2(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],i,j,jj);
+				frac_m1=1.0/n1/m_pb1*m_pb2*dt1*TUNIT*coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);	
+				//frac_m1=dt1*TUNIT*coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);
+				frac_m2=frac_m1*n1*m_pb1/peb_map[i].mass_out[jj];
+				frac_s2=pow(frac_m1,1.0/3.0);
 				if(frac_m2<frac_m1) frac_m2=frac_m1;
 					
 				
@@ -150,7 +176,8 @@ void coagulation(double dt0){
 			}
 			}
 			//printf("frac_m=%e\t",frac_m);	
-			}while(frac_s>0.02 || frac_m>0.02 );
+			}while(frac_m1>0.02 ||  frac_m2>0.02);
+		dtco_ring[i]=dt1;
 	if( 0 && dt1 < dt0) printf("ring=%d\tdt=%g %f max_frac_s=%f j=%d\n",i,dt1,dt0,frac_s,jjj);
 	sub_t=0.0;
 	while(sub_t<dt0){
@@ -186,7 +213,8 @@ void coagulation(double dt0){
 				a_pb2s=peb_map[i].size[jj];
 				a_pb2l=peb_map[i].size[jj+1];
 				a_pb3s=pow(a_pb1s*a_pb1s*a_pb1s+a_pb2s*a_pb2s*a_pb2s,1.0/3.0);
-				a_pb3l=pow(a_pb1l*a_pb1l*a_pb1l+a_pb2l*a_pb2l*a_pb2l,1.0/3.0);				      a_pb3=pow(a_pb1*a_pb1*a_pb1+a_pb2*a_pb2*a_pb2,1.0/3.0);
+				a_pb3l=pow(a_pb1l*a_pb1l*a_pb1l+a_pb2l*a_pb2l*a_pb2l,1.0/3.0);
+				a_pb3=pow(a_pb1*a_pb1*a_pb1+a_pb2*a_pb2*a_pb2,1.0/3.0);
 				
 				j_new=floor(log10(a_pb3/size_min)/size_step);	
 				j_newl=floor(log10(a_pb3l/size_min)/size_step);
@@ -223,9 +251,11 @@ void coagulation(double dt0){
 			else if(sweep){	
 				j_new=j+1;
 				if(j_new>peb_size_num-1) j_new=j;
-				frac_m1=dt1*TUNIT*coag_kernel2(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],i,j,jj);
-                                frac_m2=frac_m*n1/peb_map[i].mass_out[jj];
-                                frac_s=pow(frac_m1/m_pb1,1.0/3.0);
+				//frac_m1=1.0/m_pb1*dt1*TUNIT*coag_kernel2(a_pb1,a_pb2,delta_v,peb_map[i].rho[j],peb_map[i].rho[jj],i,j,jj);
+				frac_m1=1.0/n1/m_pb1*m_pb2*dt1*TUNIT*coag_kernel(a_pb1,a_pb2,delta_v,n1,n2,h1,h2,i,j,jj);
+				
+                                frac_m2=frac_m1*n1*m_pb1/peb_map[i].mass_out[jj];
+                                frac_s=pow(frac_m1,1.0/3.0);
 				//frac_s=pow(m_pb2*n_delta/n1/m_pb1+1,1.0/3.0)-1.0;
 				peb_map[i].mass_in[jj]-=frac_m1*n1*AREA;
 				peb_map[i].mass_in[j]-=frac_s*peb_map[i].mass_out[j];

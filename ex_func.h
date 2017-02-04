@@ -31,7 +31,7 @@ void disk_evolve();
 double vr_gas(double argc);
 double height(double argc);
 double coag_kernel(double a_pb1,double a_pb2,double delta_v,double rho1, double rho2, double dt0, double rad, int i, int j, int jj);
-void coagulation(double argc);
+void coagulation(double argc,double argc2);
 double Sigma(double argc);
 double yeta(double argc);
 double v_K(double argc);

@@ -3,6 +3,7 @@
 #define PEB_STRUCT
 #define MAXNUM 50
 extern double dt_ring[ring_num];
+extern double dtco_ring[ring_num];
 typedef struct PEBBLE{
 	int max_step;
 	double mass[time_yr];

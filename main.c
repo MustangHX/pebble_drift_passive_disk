@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include "ex_func.h"
 #include "global_ex.h"
 #include "global_var.h"
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 {
 	alpha=alpha_init;
 	mdot=mdot_init;
+	time_t time0,time1;
 	int i,j,n,num_step=0,tot_num_step=(int)(time_yr*1.0/init_step),check,NbRestart;
 	double AREA,a_pb1,a_max,vol_plus,tau,vr0,mass_flow_inner;
 	double coag_eff=1.0,tot_mass=0.0,out_source=0.0,a_p,r0,dt=init_step,time_sum=0.0,dt2,tot_mass_dust,t_single=0.0;
@@ -134,7 +136,8 @@ int main(int argc, char *argv[])
 	if(Restarting == 1){
 		num_step=NbRestart;
 	}
-
+	
+	time0=time(NULL);
 	//start time sequence
 	//disk_evolve();	
 	while (time_sum<tot_num_step*1.0)
@@ -177,7 +180,7 @@ int main(int argc, char *argv[])
 	}
 	dust_evolve(dt);
 	//disk_evolve();
-	if(1 || COAG_SW>0) {coagulation(dt);}
+	if(COAG_SW>0) {coagulation(dt,time_sum);}
 	mass_flow_inner=0.0;
 	for(i=ring_num-1;i>-1;i--){
         for(j=0;j<peb_size_num;j++){
@@ -239,9 +242,9 @@ int main(int argc, char *argv[])
 	}
 
 	}
-	
-	printf("Actual time step count:%d\t dt=%f\n",num_step,dt);
-
+	time1=time(NULL);
+		
+	printf("Actual time step count:%d dt=%f time_used=%f min\n",num_step,dt,(time1-time0)/60.0);
 
 return 0;
 }
