@@ -5,6 +5,11 @@
 #include <stdio.h>
 double pp_vr_tau1[2]={0.0};
 
+double p_size_func(double size){// size in cm
+//	return exp(-1.0*size_slope*peb_map[i].size_med[j]);
+	return pow(size,-3.0*11.0/6.0+3.0);
+}
+
 void opa_init(){// initialize opacity profile
 	int i,nr=30;
 	double rad[nr],opac1d[nr];
@@ -106,13 +111,15 @@ void Init2(){// disk with variable resolution
 	
 	for(j=0;j<peb_size_num;j++) {
 		if(peb_map[i].size_med[j]<peb_size_lim){
-			mass_norm+=exp(-1.0*size_slope*peb_map[i].size_med[j]);
+			//mass_norm+=exp(-1.0*size_slope*peb_map[i].size_med[j]);
+			mass_norm+=p_size_func(peb_map[i].size_med[j]);
 		}
 	}
         for(j=0;j<peb_size_num;j++){
 		AREA=peb_map[i].AREA;
 		if (peb_map[i].size_med[j]<peb_size_lim && i > 4) {
-			peb_map[i].mass_out[j]=peb_dust*AREA*(dust_budget[i].surf_dens*exp(-1.0*size_slope*peb_map[i].size_med[j])/mass_norm+1e-10);
+	//		peb_map[i].mass_out[j]=peb_dust*AREA*(dust_budget[i].surf_dens*exp(-1.0*size_slope*peb_map[i].size_med[j])/mass_norm+1e-10);
+			peb_map[i].mass_out[j]=peb_dust*AREA*(dust_budget[i].surf_dens*p_size_func(peb_map[i].size_med[j])/mass_norm+1e-10);
 			//peb_map[i].mass_out[j]=peb_dust*AREA*(0.1*Sigma(peb_map[i].rad_med)*exp(-1.0*peb_map[i].size_med[j])/mass_norm+1e-10);
 //			peb_map[i].mass_out[j]=0.1*AREA*(dust_budget[i].surf_dens+1e-10);
 		}
